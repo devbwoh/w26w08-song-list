@@ -1,8 +1,8 @@
 import { useLoaderData, useNavigate, Link  } from 'react-router'
 import { supabase } from '../lib/supabase'
-import { useAuthStore } from "~/lib/auth-store";
-import type { Route } from "./+types/list";
-import { useQuery } from '@tanstack/react-query';
+import { useAuthStore } from "~/lib/auth-store"
+import type { Route } from "./+types/list"
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -47,7 +47,9 @@ export default function List() {
   const { data: songs = [], isPending, isError, error } = useQuery({
     queryKey: ['songs'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('songs').select('*')
+      const { data, error } = await supabase
+        .from('songs')
+        .select('*')
       if (error) throw new Error(error.message)
       return data
     },
@@ -57,6 +59,25 @@ export default function List() {
     // staleTime이 줄어들다가 0이 되어도 자동으로 refetch되지는 않음
     // 다시 페이지를 방문했을 때 stale (시듬) 상태면 refetch됨
     staleTime: 1000 * 60 * 5, 
+  })
+
+  const queryClient = useQueryClient()
+
+  const deleteSongMutation = useMutation({
+    mutationFn: async (songId: number) => {
+      const { error } = await supabase
+        .from('songs')
+        .delete()
+        .eq('id', songId)
+      if (error) throw new Error(error.message)
+    },
+    onSuccess: () => {
+      // 삭제 성공 후, songs를 무효화하여 refetch되도록 함
+      queryClient.invalidateQueries({ queryKey: ['songs'] })
+    },
+    onError: (err: any) => {
+      alert(`노래 삭제 실패: ${err.message}`)
+    }
   })
 
   return (
@@ -85,6 +106,16 @@ export default function List() {
                 {songs.map((song: any) => (
                   <li key={song.id}>
                     <strong>{song.title}</strong> - {song.artist || '(가수 없음)'}
+                    <button
+                      // 삭제 진행 중이면 버튼 비활성화
+                      disabled={deleteSongMutation.isPending} 
+                      onClick={() => {
+                        if (confirm(`'${song.title}' 노래를 삭제하시겠습니까?`)) {
+                          deleteSongMutation.mutate(song.id)
+                        }
+                      }}>
+                      삭제
+                    </button>
                   </li>
                 ))}
               </ul>
