@@ -54,6 +54,7 @@ export function ErrorBoundary() {
 export default function List() {
   const { songs } = useLoaderData<typeof clientLoader>()
   const user = useAuthStore(s => s.user)
+  const githubSignIn = useAuthStore(s => s.githubSignIn)
   const navigate = useNavigate()
 
   return (
@@ -87,6 +88,16 @@ export default function List() {
         <div>
           <Link to="/login">로그인</Link>
           <Link to="/signup">회원가입</Link>
+          <button 
+            onClick={async () => {
+              try {
+                await githubSignIn() 
+              } catch (err: any) {
+                alert(`GitHub 인증 실패: ${err.message}`)
+              }
+            }}>
+            GitHub 로그인
+          </button>
         </div>
       )}     
     </div>
