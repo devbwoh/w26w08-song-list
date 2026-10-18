@@ -33,7 +33,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   setSession: (session) =>
     set({
-      session,
+      session: session,
       user: session?.user ?? null,
       status: session ? "authenticated" : "unauthenticated",
     }),
@@ -42,23 +42,27 @@ export const useAuthStore = create<AuthState>((set) => ({
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        // 이메일 확인 메일을 보낼 때 돌아올 주소
-        emailRedirectTo: `${window.location.origin}/list`,
-      },
+      // options: {
+      //   // 이메일 확인 메일을 보낼 때 돌아올 주소 지정 가능
+      //   emailRedirectTo: `${window.location.origin}`,
+      // },
     })
 
     if (error) throw new Error(error.message)
 
-    if (data.session) {
-      console.log("회원가입 성공", data.session.user)
-
-      set({ 
-        session: data.session, 
-        user: data.user ?? null, 
-        status: "authenticated" 
-      })
+    if (!data.session) { // data.session === null
+      console.log("회원가입 성공, 이메일 확인 필요")
+      set({ status: "unauthenticated" })
+      return
     }
+
+    console.log("회원가입 성공", data.session.user)
+
+    set({ 
+      session: data.session, 
+      user: data.user, 
+      status: "authenticated" 
+    })
   },
 
   signIn: async (email, password) => {
