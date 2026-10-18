@@ -1,4 +1,4 @@
-import { useLoaderData, useNavigate  } from 'react-router'
+import { useLoaderData, useNavigate, Link  } from 'react-router'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from "~/lib/auth-store";
 import type { Route } from "./+types/list";
@@ -84,10 +84,10 @@ export default function List() {
           )}
         </div>
       ) : (
-        <button 
-          onClick={() => navigate('/login')}>
-          로그인
-        </button>
+        <div>
+          <Link to="/login">로그인</Link>
+          <Link to="/signup">회원가입</Link>
+        </div>
       )}     
     </div>
   )
