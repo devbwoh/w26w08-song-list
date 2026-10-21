@@ -2,6 +2,8 @@
 
 # Week 08. Song List
 
+https://nano5.notion.site/Supabase-RLS-3fcdaf211d4280e695ede7e24b748bdb
+
 https://nano5.notion.site/Song-List-3ecdaf211d4280708775f16cdf600d2f
 
 <img width="640" alt="image" src="https://github.com/user-attachments/assets/a25113bf-290b-4e76-8695-06d25f21bac3" />
